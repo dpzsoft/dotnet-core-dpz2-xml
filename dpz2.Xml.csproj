@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <PackageId>dotnet-core-dpz2-xml</PackageId>
-    <Version>1.0.1907.1</Version>
+    <Version>1.1.1908.2</Version>
     <Authors>d.p.z software studio</Authors>
     <Description>基于dpz2开发套件的XML操作扩展组件(.Net Core)</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -13,7 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="dotnet-core-dpz2" Version="1.0.1907.2" />
+    <Compile Remove="demo\**" />
+    <EmbeddedResource Remove="demo\**" />
+    <None Remove="demo\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="dotnet-core-dpz2" Version="1.1.1908.5" />
   </ItemGroup>
 
   <ItemGroup>
