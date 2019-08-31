@@ -131,26 +131,34 @@ namespace dpz2.Xml {
                             sb.Clear();
                         } else if (pt == ParserTypes.NodeFinish) {
                             // 处在标签结尾
-                            if (np.NodeType != NodeType.Normal) throw new Exception($"规则外的字符'{chr}'");
-                            var npNormal = (XmlNode)np;
-                            tagName = sb.ToString();
-                            // 单节点模式
-                            if (npNormal.IsSingle) {
-                                if (!tagName.IsNone()) throw new Exception($"语法错误");
+                            if (np.NodeType == NodeType.Declaration) {
+                                if (sb.Length > 0) throw new Exception($"规则外的字符'{chr}'");
                                 // 返回上一层
                                 np = np.Parent;
+                                // 设置解析对象为空
+                                pt = ParserTypes.None;
                             } else {
-                                if (tagName.IsNone()) throw new Exception($"缺少标签名称");
-                                //if (np.Parent == null) throw new Exception($"多余的尾部标签");
-                                if (npNormal.Name != tagName) throw new Exception($"首尾标签名不匹配");
-                                // 返回上一层
-                                np = np.Parent;
+                                if (np.NodeType != NodeType.Normal) throw new Exception($"规则外的字符'{chr}'");
+                                var npNormal = (XmlNode)np;
+                                tagName = sb.ToString();
+                                // 单节点模式
+                                if (npNormal.IsSingle) {
+                                    if (!tagName.IsNone()) throw new Exception($"语法错误");
+                                    // 返回上一层
+                                    np = np.Parent;
+                                } else {
+                                    if (tagName.IsNone()) throw new Exception($"缺少标签名称");
+                                    //if (np.Parent == null) throw new Exception($"多余的尾部标签");
+                                    if (npNormal.Name != tagName) throw new Exception($"首尾标签名不匹配");
+                                    // 返回上一层
+                                    np = np.Parent;
+                                }
+                                // 设置解析对象为空
+                                pt = ParserTypes.None;
+                                // 清理缓存
+                                tagName = null;
+                                sb.Clear();
                             }
-                            // 设置解析对象为空
-                            pt = ParserTypes.None;
-                            // 清理缓存
-                            tagName = null;
-                            sb.Clear();
                         } else if (pt == ParserTypes.PropertyValueFinish) {
                             // 设置解析对象为空
                             pt = ParserTypes.None;
@@ -227,24 +235,40 @@ namespace dpz2.Xml {
                             // 标签名称设定
                             tagName = sb.ToString();
                             if (tagName.IsNone()) throw new Exception($"规则外的字符'{chr}'");
-                            // 判断是否存在处理对象
-                            if (np == null) {
+                            if (tagName == "?xml") {
+                                // 申明定义情况
+                                if (parent != null) throw new Exception($"定义只允许在文档开始位置定义");
+                                if (np != null) throw new Exception($"定义只允许在文档开始位置定义");
+                                if (nodes.Count > 0) throw new Exception($"定义只允许在文档开始位置定义");
                                 // 新增主对象
-                                var node = new XmlNode(tagName, parent);
+                                var node = new DeclarationNode();
                                 nodes.Add(node);
                                 np = node;
+                                // 设置解析类型为属性名称
+                                pt = ParserTypes.PropertyName;
+                                // 清理缓存
+                                tagName = null;
+                                sb.Clear();
                             } else {
-                                // 新增子对象
-                                var npNormal = (XmlNode)np;
-                                var nodeNew = new XmlNode(tagName, npNormal);
-                                npNormal.Nodes.Add(nodeNew);
-                                np = nodeNew;
+                                // 判断是否存在处理对象
+                                if (np == null) {
+                                    // 新增主对象
+                                    var node = new XmlNode(tagName, parent);
+                                    nodes.Add(node);
+                                    np = node;
+                                } else {
+                                    // 新增子对象
+                                    var npNormal = (XmlNode)np;
+                                    var nodeNew = new XmlNode(tagName, npNormal);
+                                    npNormal.Nodes.Add(nodeNew);
+                                    np = nodeNew;
+                                }
+                                // 设置解析类型为属性名称
+                                pt = ParserTypes.PropertyName;
+                                // 清理缓存
+                                tagName = null;
+                                sb.Clear();
                             }
-                            // 设置解析类型为属性名称
-                            pt = ParserTypes.PropertyName;
-                            // 清理缓存
-                            tagName = null;
-                            sb.Clear();
                         } else if (pt == ParserTypes.PropertyValueFinish) {
                             // 设置解析类型为属性名称
                             pt = ParserTypes.PropertyName;
@@ -279,8 +303,15 @@ namespace dpz2.Xml {
                         } else if (pt == ParserTypes.PropertyValue) {
                             // 填充值
                             pValue = sb.ToString();
-                            var npNormal = (XmlNode)np;
-                            npNormal.Attr[pName] = pValue;
+                            if (np.NodeType == NodeType.Declaration) {
+                                var npDeclaration = (DeclarationNode)np;
+                                npDeclaration.Attr[pName] = pValue;
+                            } else if (np.NodeType == NodeType.Normal) {
+                                var npNormal = (XmlNode)np;
+                                npNormal.Attr[pName] = pValue;
+                            } else {
+                                throw new Exception($"语法错误");
+                            }
                             // 设置为标签值结束
                             pt = ParserTypes.PropertyValueFinish;
                             // 清理缓存
@@ -364,6 +395,25 @@ namespace dpz2.Xml {
                                 sb.Append(chr);
                             }
                         } else if (pt == ParserTypes.CData || pt == ParserTypes.Note || pt == ParserTypes.PropertyName || pt == ParserTypes.PropertyValue) {
+                            sb.Append(chr);
+                        } else {
+                            throw new Exception($"规则外的字符'{chr}'");
+                        }
+                        break;
+                    #endregion
+                    case '?':
+                        #region [=====问号=====]
+                        if (pt == ParserTypes.PropertyName) {
+                            // 属性名称模式时，无属性定义继续
+                            if (np.NodeType != NodeType.Declaration) throw new Exception($"规则外的字符'{chr}'");
+                            if (sb.Length > 0) throw new Exception($"规则外的字符'{chr}'");
+                            // 设置为标签结尾
+                            pt = ParserTypes.NodeFinish;
+                        } else if (pt == ParserTypes.PropertyValueFinish) {
+                            // 设置为结尾标签，并设置为独立标签
+                            if (np.NodeType != NodeType.Declaration) throw new Exception($"规则外的字符'{chr}'");
+                            pt = ParserTypes.NodeFinish;
+                        } else if (pt == ParserTypes.NodeName || pt == ParserTypes.CData || pt == ParserTypes.PropertyValue || pt == ParserTypes.Note) {
                             sb.Append(chr);
                         } else {
                             throw new Exception($"规则外的字符'{chr}'");

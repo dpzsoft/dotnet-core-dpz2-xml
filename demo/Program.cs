@@ -109,7 +109,7 @@ namespace demo {
                 "  </platform>" +
                 "</database>";
 
-            string xml2 = "<xml><node1>123</node1><node2>234</node2></xml>";
+            string xml2 = "<?xml version=\"1.0\" ?><xml><node1>123</node1><node2>234</node2></xml>";
 
             var nodes = dpz2.Xml.Parser.GetNodes(xml2);
             if (nodes.Count > 0) {
