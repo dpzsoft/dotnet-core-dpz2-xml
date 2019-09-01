@@ -116,10 +116,8 @@ namespace demo {
                 Console.WriteLine(nodes[0].OuterXml);
             }
 
-            using (var doc = dpz2.Xml.Parser.GetDocument("<row onmouseover=\"this.style.backgroundColor='#f0f0f0';\" onmouseout=\"this.style.backgroundColor='';\" />")) {
-                doc["xml"]["node1"].InnerXml = "<n3 id=\"x3\">123</n3>";
-                var n3 = doc.GetNodeByAttr("id", "x3");
-                n3.Attr["Style"] = "color:#090;";
+            string xml3 = dpz2.File.UTF8File.ReadAllText(@"X:\Projects\yytol\dotnet-core-ycp-entity-manager\Xml\UI\Aos\AosAuthorize.xml");
+            using (var doc = dpz2.Xml.Parser.GetDocument(xml3)) {
                 Console.WriteLine(doc.InnerXml);
             }
 

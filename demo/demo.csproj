@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="dotnet-core-dpz2-file" Version="1.0.1907.1" />
+    <PackageReference Include="dotnet-core-dpz2-net" Version="1.0.1907.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\dpz2.Xml.csproj" />
   </ItemGroup>
 
