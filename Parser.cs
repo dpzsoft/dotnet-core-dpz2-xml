@@ -222,6 +222,12 @@ namespace dpz2.Xml {
                         if (pt == ParserTypes.NodeName) {
                             // 设置为标签结尾
                             pt = ParserTypes.NodeFinish;
+                        } else if (pt == ParserTypes.PropertyName) {
+                            if (sb.Length > 0) throw new Exception($"规则外的字符'{chr}'");
+                            // 设置为结尾标签，并设置为独立标签
+                            pt = ParserTypes.NodeFinish;
+                            var npNormal = (XmlNode)np;
+                            npNormal.IsSingle = true;
                         } else if (pt == ParserTypes.PropertyValueFinish) {
                             // 设置为结尾标签，并设置为独立标签
                             pt = ParserTypes.NodeFinish;
