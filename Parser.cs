@@ -233,7 +233,7 @@ namespace dpz2.Xml {
                             pt = ParserTypes.NodeFinish;
                             var npNormal = (XmlNode)np;
                             npNormal.IsSingle = true;
-                        } else if (pt == ParserTypes.CData || pt == ParserTypes.PropertyValue || pt == ParserTypes.Note) {
+                        } else if (pt == ParserTypes.CData || pt == ParserTypes.PropertyValue || pt == ParserTypes.Note || pt == ParserTypes.None) {
                             sb.Append(chr);
                         } else {
                             throw new Exception($"规则外的字符'{chr}'");
@@ -299,7 +299,7 @@ namespace dpz2.Xml {
                             pt = ParserTypes.PropertyNameFinish;
                             // 清理缓存
                             sb.Clear();
-                        } else if (pt == ParserTypes.CData || pt == ParserTypes.PropertyValue || pt == ParserTypes.Note) {
+                        } else if (pt == ParserTypes.CData || pt == ParserTypes.PropertyValue || pt == ParserTypes.Note || pt == ParserTypes.None) {
                             sb.Append(chr);
                         } else {
                             throw new Exception($"规则外的字符'{chr}'");
@@ -368,7 +368,7 @@ namespace dpz2.Xml {
                             } else {
                                 sb.Append(chr);
                             }
-                        } else if (pt == ParserTypes.CData || pt == ParserTypes.Note || pt == ParserTypes.PropertyName || pt == ParserTypes.PropertyValue) {
+                        } else if (pt == ParserTypes.CData || pt == ParserTypes.Note || pt == ParserTypes.PropertyName || pt == ParserTypes.PropertyValue || pt == ParserTypes.None) {
                             sb.Append(chr);
                         } else {
                             throw new Exception($"规则外的字符'{chr}'");
@@ -378,7 +378,8 @@ namespace dpz2.Xml {
                     case '[':
                         #region [=====中括号=====]
                         if (pt == ParserTypes.None) {
-                            throw new Exception($"规则外的字符'{chr}'");
+                            //throw new Exception($"规则外的字符'{chr}'");
+                            sb.Append(chr);
                         } else if (pt == ParserTypes.NodeName) {
                             // 判断是否为注释
                             if (sb.Length == 7) {
@@ -425,7 +426,7 @@ namespace dpz2.Xml {
                             // 设置为结尾标签，并设置为独立标签
                             if (np.NodeType != NodeType.Declaration) throw new Exception($"规则外的字符'{chr}'");
                             pt = ParserTypes.NodeFinish;
-                        } else if (pt == ParserTypes.NodeName || pt == ParserTypes.CData || pt == ParserTypes.PropertyValue || pt == ParserTypes.Note) {
+                        } else if (pt == ParserTypes.NodeName || pt == ParserTypes.CData || pt == ParserTypes.PropertyValue || pt == ParserTypes.Note || pt == ParserTypes.None) {
                             sb.Append(chr);
                         } else {
                             throw new Exception($"规则外的字符'{chr}'");
