@@ -15,6 +15,15 @@ namespace dpz2.Xml {
         public string Value { get; set; }
 
         /// <summary>
+        /// 设置带编码的值
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns></returns>
+        public void SetEncodeValue(string val) {
+            this.Value = Parser.EscapeDecode(val);
+        }
+
+        /// <summary>
         /// 对象实例化
         /// </summary>
         public TextNode() : base(NodeType.Text) { }
@@ -24,7 +33,7 @@ namespace dpz2.Xml {
         /// </summary>
         /// <returns></returns>
         protected override string OnGetOuterXml() {
-            return this.Value;
+            return Parser.EscapeEncode(this.Value);
         }
 
         /// <summary>

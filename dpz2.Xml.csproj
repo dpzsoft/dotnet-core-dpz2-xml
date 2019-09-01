@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <PackageId>dotnet-core-dpz2-xml</PackageId>
-    <Version>1.1.1908.3</Version>
+    <Version>1.2.1909.4</Version>
     <Authors>d.p.z software studio</Authors>
     <Description>基于dpz2开发套件的XML操作扩展组件(.Net Core)，包括一套自行研发的xml解析算法及相关的扩展操作</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>

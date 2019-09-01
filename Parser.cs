@@ -86,14 +86,14 @@ namespace dpz2.Xml {
                                 if (np == null) {
                                     // 新增主对象
                                     var node = new TextNode();
-                                    node.Value = sb.ToString();
+                                    node.SetEncodeValue(sb.ToString());
                                     nodes.Add(node);
                                 } else {
                                     // 新增子对象
                                     var npNormal = (XmlNode)np;
                                     var nodeNew = new TextNode();
                                     npNormal.Nodes.Add(nodeNew);
-                                    nodeNew.Value = sb.ToString();
+                                    nodeNew.SetEncodeValue(sb.ToString());
                                 }
                                 // 清理缓存
                                 sb.Clear();
@@ -163,7 +163,12 @@ namespace dpz2.Xml {
                             // 设置解析对象为空
                             pt = ParserTypes.None;
                             // 清理缓存
-                            tagName = null;
+                            sb.Clear();
+                        } else if (pt == ParserTypes.PropertyName) {
+                            if (sb.Length > 0) throw new Exception($"规则外的字符'{chr}'");
+                            // 设置解析对象为空
+                            pt = ParserTypes.None;
+                            // 清理缓存
                             sb.Clear();
                         } else if (pt == ParserTypes.Note) {
                             // 判断是否为注释结束
@@ -308,7 +313,8 @@ namespace dpz2.Xml {
                                 npDeclaration.Attr[pName] = pValue;
                             } else if (np.NodeType == NodeType.Normal) {
                                 var npNormal = (XmlNode)np;
-                                npNormal.Attr[pName] = pValue;
+                                //npNormal.Attr[pName] = pValue;
+                                npNormal.SetEncodeAttr(pName, pValue);
                             } else {
                                 throw new Exception($"语法错误");
                             }
@@ -468,6 +474,16 @@ namespace dpz2.Xml {
                         break;
                         #endregion
                 }
+            }
+
+            if (pt != ParserTypes.None) throw new Exception($"内容尚未结束");
+            if (sb.Length > 0) {
+                var node = new TextNode();
+                //node.Value = sb.ToString();
+                node.SetEncodeValue(sb.ToString());
+                nodes.Add(node);
+                // 清理缓存
+                sb.Clear();
             }
 
             return nodes;

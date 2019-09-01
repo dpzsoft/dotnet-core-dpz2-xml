@@ -20,6 +20,15 @@ namespace dpz2.Xml {
         public dpz2.InsensitiveKeyValues<string> Attr { get; private set; }
 
         /// <summary>
+        /// 设置属性
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="val"></param>
+        public void SetEncodeAttr(string key, string val) {
+            this.Attr[key] = Parser.EscapeDecode(val);
+        }
+
+        /// <summary>
         /// 获取或设置是否为独立标签
         /// </summary>
         public bool IsSingle { get; set; }
@@ -56,7 +65,7 @@ namespace dpz2.Xml {
             res.AppendFormat("<{0}", this.Name);
             // 拼接属性
             foreach (var key in this.Attr.Keys) {
-                res.AppendFormat(" {0}=\"{1}\"", key, this.Attr[key]);
+                res.AppendFormat(" {0}=\"{1}\"", key, Parser.EscapeEncode(this.Attr[key]));
             }
             // 拼接完整XML
             if (this.IsSingle) {
@@ -189,7 +198,7 @@ namespace dpz2.Xml {
         /// <param name="tagName"></param>
         /// <param name="searchChildNodes"></param>
         /// <returns></returns>
-        public XmlNode GetNodeByAttr(string attrName, string attrValue) {
+        public XmlNode GetNodeByAttr(string attrName, string attrValue, bool searchChildNodes = true) {
             List<XmlNode> nodes = new List<XmlNode>();
             for (int i = 0; i < this.Nodes.Count; i++) {
                 if (this.Nodes[i].NodeType == NodeType.Normal) {
@@ -198,14 +207,40 @@ namespace dpz2.Xml {
                         return node;
                     }
 
-                    if (node.Nodes.Count > 0) {
-                        // 获取子节点的查询结果并应用到结果中
-                        var childNode = node.GetNodeByAttr(attrName, attrValue);
-                        if (childNode != null) return childNode;
+                    // 深度查找
+                    if (searchChildNodes) {
+                        if (node.Nodes.Count > 0) {
+                            // 获取子节点的查询结果并应用到结果中
+                            var childNode = node.GetNodeByAttr(attrName, attrValue);
+                            if (childNode != null) return childNode;
+                        }
                     }
+
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// 添加一个新的标准节点
+        /// </summary>
+        /// <param name="tagName"></param>
+        /// <returns></returns>
+        public XmlNode AddNode(string tagName) {
+            XmlNode node = new XmlNode(tagName, this);
+            this.Nodes.Add(node);
+            return node;
+        }
+
+        /// <summary>
+        /// 添加一个注释
+        /// </summary>
+        /// <param name="tagName"></param>
+        /// <returns></returns>
+        public NoteNode AddNote() {
+            NoteNode node = new NoteNode();
+            this.Nodes.Add(node);
+            return node;
         }
 
         /// <summary>
